@@ -51,7 +51,7 @@ This project provides a Python script for monitoring and managing SIP (Session I
    - For email notifications, set SMTP and email parameters in `.env`.
    - For Telegram notifications, set your `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in `.env`.
    - To restrict notifications to specific Q.850 cause codes, set the `NOTIFY_CAUSES` variable in `.env`:
-     - `NOTIFY_CAUSES=21,34` — Notify only if cause is 21 (Call Rejected) or 34 (No Circuit/Channel Available), etc.
+     - `NOTIFY_CAUSES= [21,34]` — Notify only if cause is 21 (Call Rejected) or 34 (No Circuit/Channel Available), etc.
      - `NOTIFY_CAUSES=None` — Do not send any notifications for any cause.
      - `NOTIFY_CAUSES=ALL` — (Default) Send notifications for any cause.
 

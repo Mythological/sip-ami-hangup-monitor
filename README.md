@@ -51,11 +51,12 @@ This project provides a Python script for monitoring and managing SIP (Session I
    ```
    - Edit configuration variables in the `.env` file (such as SIP server address, credentials, call parameters, notification settings, etc.).
    - The variables `ORIGINATE_CALLERID`, `ORIGINATE_CHANNEL`, `ORIGINATE_CONTEXT`, `ORIGINATE_EXTEN`, and `ORIGINATE_PRIORITY` control outgoing call parameters and event filtering.
+   - **The script will send notifications if either `CallerIDNum` or `ConnectedLineNum` in the event matches `ORIGINATE_CALLERID`.** This ensures correct detection regardless of call direction.
    - Choose notification method by setting `NOTIFY_EMAIL` and/or `NOTIFY_TELEGRAM` in `.env`.
    - For email notifications, set SMTP and email parameters in `.env`.
    - For Telegram notifications, set your `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in `.env`.
    - To restrict notifications to specific Q.850 cause codes, set the `NOTIFY_CAUSES` variable in `.env`:
-     - `NOTIFY_CAUSES= [21,34]` — Notify only if cause is 21 (Call Rejected) or 34 (No Circuit/Channel Available), etc.
+     - `NOTIFY_CAUSES=21,34` — Notify only if cause is 21 (Call Rejected) or 34 (No Circuit/Channel Available), etc.
      - `NOTIFY_CAUSES=None` — Do not send any notifications for any cause.
      - `NOTIFY_CAUSES=ALL` — (Default) Send notifications for any cause.
 
@@ -75,7 +76,7 @@ This project provides a Python script for monitoring and managing SIP (Session I
 To run the script automatically at 05:30 every day and log output to a file, add the following line to your crontab (edit with `crontab -e`):
 
 ```
-30 05 * * *         /opt/sip-ami-hangup-monitor/venv/bin/python3.8 /opt/sip-ami-hangup-monitor/SIP_Hangup_Monitor.py >> /opt/sip-ami-hangup-monitor/cron.log 2>&1
+30 05 * * *         /opt/sip-ami-hangup-monitor/venv/bin/python3.6 /opt/sip-ami-hangup-monitor/SIP_Hangup_Monitor.py >> /opt/sip-ami-hangup-monitor/cron.log 2>&1
 ```
 
 ## Notes
@@ -87,3 +88,4 @@ To run the script automatically at 05:30 every day and log output to a file, add
 ## License
 
 MIT License
+

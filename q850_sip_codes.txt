@@ -1,0 +1,30 @@
+# Q.850 Cause Codes and SIP Mapping
+# Format: 
+
+Cause | Cause-txt                        | SIP-код | SIP-описание
+
+1     | Unallocated Number               | 404     | Not Found
+16    | Normal Call Clearing             | 200/487 | Normal Call Clearing
+17    | User Busy                        | 486     | Busy Here
+18    | No User Responding               | 408     | Request Timeout
+19    | No Answer from User              | 480     | Temporarily Unavailable
+20    | Subscriber Absent                | 410     | Gone
+21    | Call Rejected (Declined)         | 603     | Decline
+22    | Number Changed                   | 410     | Gone
+23    | Redirection                      | 302     | Moved Temporarily
+27    | Destination Out of Order         | 502     | Bad Gateway
+28    | Invalid Number Format            | 484     | Address Incomplete
+29    | Facility Rejected                | 501     | Not Implemented
+34    | No Circuit/Channel Available     | 503     | Service Unavailable
+38    | Network Out of Order             | 504     | Gateway Timeout
+41    | Temporary Failure                | 500     | Server Internal Error
+42    | Switching Equipment Congestion   | 503     | Service Unavailable
+47    | Resource Unavailable             | 480     | Temporarily Unavailable
+52    | Outgoing Call Barred             | 403     | Forbidden
+54    | Incoming Call Barred             | 403     | Forbidden
+57    | Bearer Capability Not Authorized | 403     | Forbidden
+58    | Bearer Capability Not Available  | 503     | Service Unavailable
+63    | Service Not Available            | 503     | Service Unavailable
+79    | Service/Option Not Implemented   | 501     | Not Implemented
+87    | User Not Member of CUG           | 403     | Forbidden
+88    | Incompatible Destination         | 488     | Not Acceptable Here

@@ -1,4 +1,4 @@
-# SIP Hangup Monitor
+# SIP AMI Hangup Monitor
 
 This project provides a Python script for monitoring and managing SIP (Session Initiation Protocol) call hangups. The script automates the detection and handling of SIP call hangup events, which is essential for maintaining call quality, troubleshooting, and ensuring reliable telecommunication services in any organization.
 

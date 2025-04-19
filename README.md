@@ -45,6 +45,10 @@ This project provides a Python script for monitoring and managing SIP (Session I
 ## Usage
 
 1. **Configure the script and notifications:**
+   - Copy env example to env 
+   ```bash
+   cp -rp .env_example .env
+   ```
    - Edit configuration variables in the `.env` file (such as SIP server address, credentials, call parameters, notification settings, etc.).
    - The variables `ORIGINATE_CALLERID`, `ORIGINATE_CHANNEL`, `ORIGINATE_CONTEXT`, `ORIGINATE_EXTEN`, and `ORIGINATE_PRIORITY` control outgoing call parameters and event filtering.
    - Choose notification method by setting `NOTIFY_EMAIL` and/or `NOTIFY_TELEGRAM` in `.env`.

@@ -8,8 +8,6 @@ If the Hangup event relates to a call with CallerIDNum and ConnectedLineNum equa
 If the Hangup event does not relate to the desired call, it is ignored and waiting continues.
 After the first suitable Hangup, the script terminates.
 If the script runs for more than 1 minute, it exits with an error.
-The script should run in a virtual environment (venv) and use shebang for python3.6.
-All code is in one file.
 
 Подключается к Asterisk AMI по заданным параметрам (host, port, user, password).
 Инициирует исходящий звонок на заданный номер через SIP-канал.
@@ -18,7 +16,6 @@ All code is in one file.
 Если событие Hangup не относится к нужному вызову — игнорировать и продолжать ждать.
 После первого подходящего Hangup скрипт завершает работу.
 Если скрипт работает больше 1 минуты — завершить выполнение с ошибкой.
-Скрипт должен работать в виртуальном окружении (venv), использовать shebang для python3.6.
 
 """
 from email.mime.text import MIMEText

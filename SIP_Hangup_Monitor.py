@@ -4,7 +4,7 @@
 Connects to Asterisk AMI using the specified parameters (host, port, user, password).
 Initiates an outgoing call to the specified number via the SIP channel.
 Waits for the Hangup event.
-If the Hangup event relates to a call with CallerIDNum and ConnectedLineNum equal to '0113305', it sends an email with the details of Cause and Cause-txt to the specified address via SMTP without TLS/authentication.
+If the Hangup event relates to a call with CallerIDNum and ConnectedLineNum equal to '0145133055', it sends an email with the details of Cause and Cause-txt to the specified address via SMTP.
 If the Hangup event does not relate to the desired call, it is ignored and waiting continues.
 After the first suitable Hangup, the script terminates.
 If the script runs for more than 1 minute, it exits with an error.
@@ -14,7 +14,7 @@ All code is in one file.
 Подключается к Asterisk AMI по заданным параметрам (host, port, user, password).
 Инициирует исходящий звонок на заданный номер через SIP-канал.
 Ожидает событие Hangup.
-Если событие Hangup относится к вызову с CallerIDNum и ConnectedLineNum равными '0113305', то отправляет email с деталями Cause и Cause-txt на указанный адрес через SMTP без TLS/авторизации.
+Если событие Hangup относится к вызову с CallerIDNum и ConnectedLineNum равными '0145133055', то отправляет email с деталями Cause и Cause-txt на указанный адрес через SMTP.
 Если событие Hangup не относится к нужному вызову — игнорировать и продолжать ждать.
 После первого подходящего Hangup скрипт завершает работу.
 Если скрипт работает больше 1 минуты — завершить выполнение с ошибкой.
@@ -26,38 +26,60 @@ from asterisk.ami import AMIClient, SimpleAction, EventListener
 from asterisk.ami.event import Event
 import time
 import sys
+import os
+from dotenv import load_dotenv
 from notify_email import send_error_email
 from notify_telegram import send_error_telegram
 
 shutdown_requested = False
 
+# Load environment variables from .env file
+load_dotenv()
+
 # Setup Asterisk AMI
-AMI_HOST = '127.0.0.1'
-AMI_PORT = 5038
-AMI_USER = 'monitor'
-AMI_PASS = 'PASS'
+AMI_HOST = os.getenv('AMI_HOST')
+AMI_PORT = int(os.getenv('AMI_PORT', 5038))
+AMI_USER = os.getenv('AMI_USER')
+AMI_PASS = os.getenv('AMI_PASS')
 
-SMTP_SERVER = '172.14.1.1'
-SMTP_PORT = 25
-SMTP_USER = 'mesw@spo.com'
-SMTP_PASS = ''
-EMAIL_TO = 'ten@spo.com'
+SMTP_SERVER = os.getenv('SMTP_SERVER')
+SMTP_PORT = int(os.getenv('SMTP_PORT', 25))
+SMTP_USER = os.getenv('SMTP_USER')
+SMTP_PASS = os.getenv('SMTP_PASS')
+EMAIL_TO = os.getenv('EMAIL_TO')
+USE_TLS_EMAIL = os.getenv('USE_TLS_EMAIL', 'False').lower() == 'true'
 
-# Notification settings
-NOTIFY_EMAIL = True
-NOTIFY_TELEGRAM = False
-USE_TLS_EMAIL = False  # Set to True if your SMTP server requires TLS
+NOTIFY_EMAIL = os.getenv('NOTIFY_EMAIL', 'True').lower() == 'true'
+NOTIFY_TELEGRAM = os.getenv('NOTIFY_TELEGRAM', 'False').lower() == 'true'
 
 # Notify only for these Q.850 causes:
 #   [21, 34] - send only if cause is 21 or 34
 #   None     - do not send any notifications
-#   'ALL'    - send for any cause 
-NOTIFY_CAUSES = 'ALL'  # Options: [21, 34], None, or 'ALL'
+#   'ALL'    - send for any cause
+NOTIFY_CAUSES_ENV = os.getenv('NOTIFY_CAUSES', 'ALL')
+if NOTIFY_CAUSES_ENV == 'ALL':
+    NOTIFY_CAUSES = 'ALL'
+elif NOTIFY_CAUSES_ENV.strip().lower() in ['none', 'null', '']:  # treat as None
+    NOTIFY_CAUSES = None
+else:
+    try:
+        NOTIFY_CAUSES = [int(x.strip()) for x in NOTIFY_CAUSES_ENV.split(',') if x.strip().isdigit()]
+    except Exception:
+        NOTIFY_CAUSES = 'ALL'
 
-# Telegram settings
-TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN'
-TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID'
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
+# Outgoing call parameters
+ORIGINATE_CHANNEL = os.getenv('ORIGINATE_CHANNEL', 'SIP/YourTRUNK/1231')
+ORIGINATE_CONTEXT = os.getenv('ORIGINATE_CONTEXT', 'from-internal')
+ORIGINATE_EXTEN = os.getenv('ORIGINATE_EXTEN', '*43')
+ORIGINATE_PRIORITY = int(os.getenv('ORIGINATE_PRIORITY', 1))
+ORIGINATE_CALLERID = os.getenv('ORIGINATE_CALLERID', '0145133055')
+
+# Use ORIGINATE_CALLERID for all relevant checks
+CALLERIDNUM = ORIGINATE_CALLERID
+CONNECTEDLINENUM = ORIGINATE_CALLERID
 
 def notify(cause, cause_txt, channel, exten):
     if NOTIFY_EMAIL:
@@ -93,11 +115,11 @@ def main():
 
     action = SimpleAction(
         'Originate',
-        Channel='SIP/YourTRUNK/1231',  # or SIP/100
-        Context='from-internal',
-        Exten='*43',
-        Priority=1,
-        CallerID='0145133055',
+        Channel=ORIGINATE_CHANNEL,
+        Context=ORIGINATE_CONTEXT,
+        Exten=ORIGINATE_EXTEN,
+        Priority=ORIGINATE_PRIORITY,
+        CallerID=ORIGINATE_CALLERID,
         Async='true'
     )
     print('Sending Originate action...')
@@ -111,7 +133,7 @@ def main():
             cause_txt = None
             try:
                 try:
-                    if (event['CallerIDNum'] == '0145133055' and event['ConnectedLineNum'] == '0145133055'):
+                    if (event['CallerIDNum'] == CALLERIDNUM and event['ConnectedLineNum'] == CONNECTEDLINENUM):
                         if isinstance(event, Event) and 'Cause' in event.keys:
                             cause = event['Cause']
                             if 'Cause-txt' in event.keys:
@@ -152,3 +174,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

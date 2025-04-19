@@ -4,18 +4,21 @@
 Connects to Asterisk AMI using the specified parameters (host, port, user, password).
 Initiates an outgoing call to the specified number via the SIP channel.
 Waits for the Hangup event.
-If the Hangup event relates to a call with CallerIDNum and ConnectedLineNum equal to '0145133055', it sends an email with the details of Cause and Cause-txt to the specified address via SMTP.
+If the Hangup event relates to a call with CallerIDNum and ConnectedLineNum equal to '0113305', it sends an email with the details of Cause and Cause-txt to the specified address via SMTP without TLS/authentication.
 If the Hangup event does not relate to the desired call, it is ignored and waiting continues.
 After the first suitable Hangup, the script terminates.
-If the script runs for more than 10 minutes, it exits with an error.
+If the script runs for more than 1 minute, it exits with an error.
+The script should run in a virtual environment (venv) and use shebang for python3.6.
+All code is in one file.
 
 Подключается к Asterisk AMI по заданным параметрам (host, port, user, password).
 Инициирует исходящий звонок на заданный номер через SIP-канал.
 Ожидает событие Hangup.
-Если событие Hangup относится к вызову с CallerIDNum и ConnectedLineNum равными '0145133055', то отправляет email с деталями Cause и Cause-txt на указанный адрес через SMTP.
+Если событие Hangup относится к вызову с CallerIDNum и ConnectedLineNum равными '0113305', то отправляет email с деталями Cause и Cause-txt на указанный адрес через SMTP без TLS/авторизации.
 Если событие Hangup не относится к нужному вызову — игнорировать и продолжать ждать.
 После первого подходящего Hangup скрипт завершает работу.
-Если скрипт работает больше 10 минут — завершить выполнение с ошибкой.
+Если скрипт работает больше 1 минуты — завершить выполнение с ошибкой.
+Скрипт должен работать в виртуальном окружении (venv), использовать shebang для python3.6.
 
 """
 from email.mime.text import MIMEText
@@ -45,6 +48,12 @@ NOTIFY_EMAIL = True
 NOTIFY_TELEGRAM = False
 USE_TLS_EMAIL = False  # Set to True if your SMTP server requires TLS
 
+# Notify only for these Q.850 causes:
+#   [21, 34] - send only if cause is 21 or 34
+#   None     - do not send any notifications
+#   'ALL'    - send for any cause 
+NOTIFY_CAUSES = 'ALL'  # Options: [21, 34], None, or 'ALL'
+
 # Telegram settings
 TELEGRAM_BOT_TOKEN = 'YOUR_BOT_TOKEN'
 TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID'
@@ -60,6 +69,21 @@ def notify(cause, cause_txt, channel, exten):
     if NOTIFY_TELEGRAM:
         send_error_telegram(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, cause, cause_txt, channel, exten)
 
+def notify_if_cause_allowed(cause, cause_txt, channel, exten):
+    try:
+        cause_int = int(cause)
+    except Exception:
+        cause_int = None
+    # Logic for NOTIFY_CAUSES
+    if NOTIFY_CAUSES is None:
+        print(f'[INFO] Notification skipped: NOTIFY_CAUSES is None')
+        return
+    if isinstance(NOTIFY_CAUSES, list) and cause_int not in NOTIFY_CAUSES:
+        print(f'[INFO] Notification skipped: cause {cause} not in NOTIFY_CAUSES {NOTIFY_CAUSES}')
+        return
+    # 'ALL' or any other value will send notifications for any cause
+    notify(cause, cause_txt, channel, exten)
+
 def main():
     global shutdown_requested
     start_time = time.time()
@@ -71,7 +95,7 @@ def main():
         'Originate',
         Channel='SIP/YourTRUNK/1231',  # or SIP/100
         Context='from-internal',
-        Exten='4444',
+        Exten='*43',
         Priority=1,
         CallerID='0145133055',
         Async='true'
@@ -97,7 +121,7 @@ def main():
                             channel = event.get('Channel', 'N/A')
                             exten = event.get('Exten', 'N/A')
                             print(f">>> Extracted from Event: Cause={cause}, Cause-txt={cause_txt}, Channel={channel}, Exten={exten}")
-                            notify(cause, cause_txt, channel, exten)
+                            notify_if_cause_allowed(cause, cause_txt, channel, exten)
                         else:
                             print('[DEBUG] Skipped Hangup: no Cause in event')
                         shutdown_requested = True
@@ -116,7 +140,7 @@ def main():
         while not shutdown_requested:
             time.sleep(0.5)
             if time.time() - start_time > 60:
-                print('[ERROR] Script has been running for more than 1 minutes, exiting!')
+                print('[ERROR] Script has been running for more than 1 minute, exiting!')
                 client.logoff()
                 sys.exit(1)
     except KeyboardInterrupt:

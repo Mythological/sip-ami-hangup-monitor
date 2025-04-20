@@ -32,7 +32,7 @@ This project provides a Python script for monitoring and managing SIP (Session I
    ```bash
    python -m venv venv
    # On Windows:
-   venv\Scripts\activate.ps1
+   venv\Scripts\activate
    # On Linux/macOS:
    source venv/bin/activate
    ```

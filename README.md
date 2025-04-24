@@ -85,6 +85,20 @@ To run the script automatically at 05:30 every day and log output to a file, add
 - For production use, consider running the script as a background service or with a process manager.
 - You can extend notification logic by editing or adding modules like `notify_email.py` and `notify_telegram.py`.
 
+## Donate
+
+BTC: bc1qna64m0wpelkhy3vwhctvpp5g2elsqhj4ykyfgs
+
+ETH: 0x91b86a88c8deb74da72db8743e60f8f6b104e263
+
+USDT TRC20: TFGXNg8GGYQJBAGjZ4bmWHuCTznSmyNqMp
+
+LTC: ltc1qprphmcj7dncdj4k0aucuw43axefyvmdx22tcw5
+
+DOGE: DJmwXWqqmhGy1cSFmgxakP4YhA3PEKksgT
+
+Solana: DmfDLbkHRqhd3LRoGgWpdWLcDAT3dk1wZdSD2sZoGfNe
+
 ## License
 
 MIT License
